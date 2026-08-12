@@ -1,0 +1,22 @@
+'use strict';
+const { ApiError, asyncHandler } = require('../lib/errors');
+const { limitFrom } = require('../lib/validation');
+
+function admin(req) { if (!req.user.isAdmin) throw ApiError.forbidden('Administrator access required.', 'ADMIN_REQUIRED'); }
+function registerRiskRoutes(app, { db, auth, risk, audit }) {
+  app.post('/api/risk/evaluate', auth, asyncHandler(async (req, res) => {
+    const body = req.body || {};
+    const result = risk.evaluate({ userId: req.user.sub, evaluationType: String(body.evaluationType || 'account_login'), subjectType: String(body.subjectType || 'user'), subjectId: body.subjectId || req.user.sub, paymentIntentId: body.paymentIntentId || null, transactionId: body.transactionId || null, idempotencyKey: req.get('Idempotency-Key') || body.idempotencyKey, scenario: body.scenario || 'LOW_RISK', signals: body.signals || {} });
+    res.status(result.duplicate ? 200 : 201).json({ evaluation: result.evaluation, duplicate: result.duplicate });
+  }));
+  app.get('/api/risk/status', auth, asyncHandler(async (req, res) => {
+    const latest = db.prepare('SELECT * FROM risk_evaluations WHERE user_id=? ORDER BY created_at DESC LIMIT 1').get(Number(req.user.sub));
+    res.json({ status: latest ? latest.decision : 'allow', score: latest?.score ?? 0, evaluationId: latest?.id || null });
+  }));
+  app.get('/api/admin/risk/cases', auth, asyncHandler(async (req, res) => { admin(req); const rows = db.prepare('SELECT c.*,u.username,u.email FROM risk_cases c JOIN users u ON u.id=c.user_id WHERE c.status IN (\'open\',\'under_review\') ORDER BY c.created_at ASC LIMIT ?').all(limitFrom(req.query.limit, 50, 100)); res.json({ cases: rows }); }));
+  app.get('/api/admin/risk/cases/:id', auth, asyncHandler(async (req, res) => { admin(req); const row = db.prepare('SELECT c.*,e.score,e.decision,e.reason_codes,u.username,u.email FROM risk_cases c JOIN risk_evaluations e ON e.id=c.evaluation_id JOIN users u ON u.id=c.user_id WHERE c.id=?').get(req.params.id); if (!row) throw ApiError.notFound('Risk case not found.'); res.json({ case: row }); }));
+  app.post('/api/admin/risk/cases/:id/decision', auth, asyncHandler(async (req, res) => { admin(req); const decision = String(req.body?.decision || ''); if (!['allow','deny','continue_review'].includes(decision)) throw ApiError.badRequest('Invalid risk decision.', 'INVALID_RISK_DECISION'); const row = db.prepare('SELECT * FROM risk_cases WHERE id=?').get(req.params.id); if (!row) throw ApiError.notFound('Risk case not found.'); const status = decision === 'continue_review' ? 'under_review' : 'resolved'; db.prepare('UPDATE risk_cases SET status=?,reviewer_user_id=?,resolution=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').run(status, Number(req.user.sub), decision, req.params.id); audit?.record(`risk.case_${status === 'under_review' ? 'reviewed' : decision === 'deny' ? 'denied' : 'allowed'}`, { userId: row.user_id, metadata: { caseId: req.params.id, actorUserId: req.user.sub, decision } }); res.json({ case: db.prepare('SELECT * FROM risk_cases WHERE id=?').get(req.params.id) }); }));
+  app.post('/api/admin/risk/cases/:id/resolve', auth, asyncHandler(async (req, res) => { admin(req); const row = db.prepare('SELECT * FROM risk_cases WHERE id=?').get(req.params.id); if (!row) throw ApiError.notFound('Risk case not found.'); db.prepare("UPDATE risk_cases SET status='resolved',reviewer_user_id=?,resolution=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(Number(req.user.sub), String(req.body?.resolution || 'resolved').slice(0, 240), req.params.id); audit?.record('risk.case_resolved', { userId: row.user_id, metadata: { caseId: req.params.id, actorUserId: req.user.sub } }); res.json({ case: db.prepare('SELECT * FROM risk_cases WHERE id=?').get(req.params.id) }); }));
+  app.post('/api/admin/risk/cases/:id/dismiss', auth, asyncHandler(async (req, res) => { admin(req); const row = db.prepare('SELECT * FROM risk_cases WHERE id=?').get(req.params.id); if (!row) throw ApiError.notFound('Risk case not found.'); db.prepare("UPDATE risk_cases SET status='dismissed',reviewer_user_id=?,resolution=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(Number(req.user.sub), String(req.body?.resolution || 'dismissed').slice(0, 240), req.params.id); audit?.record('risk.case_dismissed', { userId: row.user_id, metadata: { caseId: req.params.id, actorUserId: req.user.sub } }); res.json({ case: db.prepare('SELECT * FROM risk_cases WHERE id=?').get(req.params.id) }); }));
+}
+module.exports = { registerRiskRoutes }; 

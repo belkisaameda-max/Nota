@@ -1,0 +1,22 @@
+{
+  "name": "nota",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nota is a test-credit wallet demo. It never moves real money.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test-mvp.js",
+    "test:phase4": "node test-phase4.js",
+    "test:phase5": "node test-phase5.js",
+    "test:phase6": "node test-phase6.js",
+    "test:phase7": "node test-phase7.js",
+    "test:phase8": "node test-phase8.js",
+    "test:phase9": "node test-phase9.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

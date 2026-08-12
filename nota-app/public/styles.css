@@ -1,0 +1,550 @@
+/* =========================================================================
+   Nota — design tokens
+   A test-credit wallet styled like an engraved banknote and a paper
+   ledger: the visual language keeps saying "this is fake money" so the
+   fiction never gets confused for the real thing.
+   ========================================================================= */
+
+:root {
+  --paper: #e7e2d0;
+  --paper-raised: #f1ede1;
+  --ink: #1b2420;
+  --ink-soft: #4b5850;
+  --ledger-green: #2e5c4e;
+  --ledger-green-deep: #1e3f35;
+  --brass: #a6813a;
+  --stamp-red: #a5382c;
+  --rule: #c7bfa6;
+  --rule-strong: #a89f80;
+  --danger-bg: #f4e2df;
+
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius-card: 18px;
+  --radius-control: 10px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, #efe9d8 0%, transparent 60%),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+a { color: var(--ledger-green-deep); }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* ---------------------------------------------------------------------
+   Shell
+   --------------------------------------------------------------------- */
+
+#app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px 20px 64px;
+}
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.masthead__brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--ledger-green-deep);
+}
+
+.masthead__brand small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.masthead__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--ledger-green-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.link-button:hover { color: var(--stamp-red); }
+
+/* ---------------------------------------------------------------------
+   Buttons & inputs
+   --------------------------------------------------------------------- */
+
+.btn {
+  appearance: none;
+  border: 1px solid var(--ledger-green-deep);
+  background: var(--ledger-green);
+  color: #f4f1e6;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 18px;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+.btn:hover { background: var(--ledger-green-deep); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ledger-green-deep);
+}
+.btn--ghost:hover { background: rgba(46, 92, 78, 0.08); }
+
+.btn--block { width: 100%; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.field input, .field textarea {
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-raised);
+  border-radius: var(--radius-control);
+  padding: 10px 12px;
+  color: var(--ink);
+}
+
+.field input:focus, .field textarea:focus {
+  border-color: var(--ledger-green);
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+.field-row > .field { flex: 1; }
+
+/* ---------------------------------------------------------------------
+   Auth card
+   --------------------------------------------------------------------- */
+
+.auth-shell {
+  min-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.auth-shell .masthead {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: 0 1px 0 rgba(27, 36, 32, 0.04);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--paper);
+  border-radius: var(--radius-control);
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.tabs button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.tabs button[aria-selected="true"] {
+  background: var(--ledger-green);
+  color: #f4f1e6;
+}
+
+.form-error {
+  background: var(--danger-bg);
+  border: 1px solid var(--stamp-red);
+  color: var(--stamp-red);
+  font-size: 13px;
+  border-radius: var(--radius-control);
+  padding: 9px 12px;
+  margin-bottom: 14px;
+}
+
+.demo-hint {
+  margin-top: 16px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.demo-hint strong { color: var(--ink); }
+
+/* ---------------------------------------------------------------------
+   Banknote balance card — the signature element
+   --------------------------------------------------------------------- */
+
+.note {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  padding: 26px 24px 22px;
+  margin-bottom: 24px;
+  color: #f4f1e6;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.06), transparent 55%),
+    var(--ledger-green-deep);
+  border: 1px solid var(--ledger-green-deep);
+}
+
+.note::before,
+.note::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  height: 10px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(244, 241, 230, 0.35) 0px,
+    rgba(244, 241, 230, 0.35) 1px,
+    transparent 1px,
+    transparent 6px
+  );
+  opacity: 0.5;
+}
+.note::before { top: 10px; }
+.note::after { bottom: 10px; }
+
+.note__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.note__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 230, 0.65);
+  margin: 6px 0 6px;
+}
+
+.note__balance {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 42px;
+  letter-spacing: 0.01em;
+  color: #f4f1e6;
+}
+
+.note__meta {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(244, 241, 230, 0.7);
+}
+
+.stamp {
+  position: absolute;
+  top: 16px;
+  right: 8px;
+  transform: rotate(9deg);
+  border: 2px solid var(--stamp-red);
+  color: var(--stamp-red);
+  background: rgba(244, 241, 230, 0.92);
+  mix-blend-mode: multiply;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-align: center;
+  line-height: 1.35;
+  padding: 5px 9px;
+  border-radius: 6px;
+  z-index: 2;
+}
+
+/* ---------------------------------------------------------------------
+   Sections
+   --------------------------------------------------------------------- */
+
+.section {
+  margin-bottom: 26px;
+}
+
+.section__title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.send-panel {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  padding: 18px;
+}
+
+.recipient-search {
+  position: relative;
+}
+
+.recipient-results {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 6px 18px rgba(27, 36, 32, 0.12);
+}
+
+.recipient-results button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+}
+.recipient-results button:hover { background: var(--paper); }
+
+.recipient-hint {
+  margin-top: 6px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px dashed var(--line, #c9c2ad);
+  border-radius: 6px;
+}
+
+.recipient-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.recipient-chip button {
+  border: none;
+  background: none;
+  color: var(--stamp-red);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.form-success {
+  background: #e4ede6;
+  border: 1px solid var(--ledger-green);
+  color: var(--ledger-green-deep);
+  font-size: 13px;
+  border-radius: var(--radius-control);
+  padding: 9px 12px;
+  margin-bottom: 14px;
+}
+
+/* ---------------------------------------------------------------------
+   Ledger (transaction history)
+   --------------------------------------------------------------------- */
+
+.ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--paper-raised);
+}
+
+.ledger__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px dashed var(--rule);
+}
+.ledger__row:last-child { border-bottom: none; }
+
+.ledger__date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  width: 58px;
+  flex: 0 0 auto;
+}
+
+.ledger__body { flex: 1; min-width: 0; }
+
+.ledger__name {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.ledger__note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ledger__amount {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  flex: 0 0 auto;
+  text-align: right;
+}
+.ledger__amount--out { color: var(--stamp-red); }
+.ledger__amount--in { color: var(--ledger-green-deep); }
+
+.ledger__empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+}
+
+/* ---------------------------------------------------------------------
+   Utility
+   --------------------------------------------------------------------- */
+
+.hidden { display: none !important; }
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(244, 241, 230, 0.5);
+  border-top-color: #f4f1e6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -2px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+footer.legal {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+
+/* mobile polish */
+@media (max-width: 560px) {
+  .field-row {
+    flex-direction: column;
+  }
+  .note__balance {
+    font-size: clamp(1.6rem, 8vw, 2.4rem);
+  }
+  .masthead {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
